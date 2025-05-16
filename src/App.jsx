@@ -1,63 +1,65 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import HomePage from '@/pages/HomePage';
-import Footer from '@/components/Footer';
-import LoginPage from '@/pages/LoginPage';
-import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { ThemeProvider } from '@/components/theme-provider.jsx';
+import HomePage from '@/pages/HomePage.jsx';
+import AdminLoginPage from '@/pages/AdminLoginPage.jsx';
+import AdminDashboardPage from '@/pages/AdminDashboardPage.jsx';
+import Navbar from '@/components/catalog/Navbar.jsx';
+import Footer from '@/components/catalog/Footer.jsx';
+import { auth } from '@/firebase.js';
+import { onAuthStateChanged } from 'firebase/auth';
 
-function AppContent() {
-  const { isAdmin, logout } = useAuth();
+function ProtectedRoute({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-900">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-black text-white">
-        <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
-          <Link to="/" className="mr-6 flex items-center space-x-2">
-            <span className="font-bold text-2xl text-white">
-              <img src={logo} alt="Quitzau Logo" className="h-12" />
-            </span>
-          </Link>
-          <nav className="flex items-center gap-4">
-            {isAdmin ? (
-              <Button variant="ghost" onClick={logout} className="text-sm font-medium text-slate-300 hover:text-white">
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            ) : (
-              <Button asChild variant="outline" className="transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-105 bg-white text-black hover:bg-slate-100">
-                <Link to="/login">Admin Login</Link>
-              </Button>
-            )}
-          </nav>
-        </div>
-      </header>
-      
-      <main className="flex-1 container max-w-screen-2xl py-8">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={isAdmin ? <Navigate to="/" /> : <LoginPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </main>
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-      
-      <Toaster />
-      <Footer />
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-brand-black">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-brand-gold"></div>
+        <p className="ml-4 text-brand-white text-lg">Carregando...</p>
+      </div>
+    );
+  }
+
+  return user ? children : <Navigate to="/login" />;
 }
 
-import logo from '@/assets/logo.png';
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </Router>
+    <ThemeProvider defaultTheme="dark" storageKey="quitzau-catalog-theme">
+      <Router>
+        <div className="flex flex-col min-h-screen bg-brand-black">
+          <Navbar />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<AdminLoginPage />} />
+              <Route 
+                path="/admin/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
+      <Toaster />
+    </ThemeProvider>
   );
 }
 

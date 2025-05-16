@@ -5,65 +5,66 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* White */
-    --foreground: 222.2 84% 4.9%; /* Dark Blue/Almost Black */
+    --background: 240 10% 4%; /* brand.black */
+    --foreground: 0 0% 100%; /* brand.white */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 240 8% 12%; /* brand.charcoal */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 240 8% 12%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 0 0% 0%; /* Black */
-    --primary-foreground: 0 0% 100%; /* White */
+    --primary: 45 67% 51%; /* brand.gold */
+    --primary-foreground: 240 10% 4%; /* brand.black for text on gold buttons */
 
-    --secondary: 210 40% 96.1%; /* Light Gray */
-    --secondary-foreground: 222.2 47.4% 11.2%; /* Dark Blue */
+    --secondary: 240 5% 66%; /* brand.gray */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%; /* Medium Gray */
+    --muted: 240 5% 30%; /* Darker gray for muted elements */
+    --muted-foreground: 240 5% 75%; /* Lighter gray for muted text */
 
-    --accent: 210 40% 96.1%; /* Using Light Gray as accent, can be changed */
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 70% 63%; /* brand.lightgold */
+    --accent-foreground: 240 10% 4%;
 
-    --destructive: 0 84.2% 60.2%; /* Red */
-    --destructive-foreground: 0 0% 100%; /* White */
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%; /* Light Gray Border */
-    --input: 214.3 31.8% 91.4%;
-    --ring: 0 0% 0%; /* Black for focus rings */
+    --border: 240 5% 25%; /* Darker border */
+    --input: 240 5% 20%; /* Dark input background */
+    --ring: 45 67% 51%; /* brand.gold for focus rings */
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%; /* Dark Blue/Almost Black */
-    --foreground: 210 40% 98%; /* Light Gray/Almost White */
+    /* Dark theme is default, so these can be the same or slightly adjusted if needed */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 100%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 240 8% 12%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 240 8% 12%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 0 0% 100%; /* White for dark mode primary */
-    --primary-foreground: 0 0% 0%; /* Black for dark mode primary text */
+    --primary: 45 67% 51%;
+    --primary-foreground: 240 10% 4%;
 
-    --secondary: 217.2 32.6% 17.5%; /* Darker Gray */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 5% 66%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%; /* Lighter Gray */
-    
-    --accent: 217.2 32.6% 17.5%; /* Darker Gray as accent */
-    --accent-foreground: 210 40% 98%;
+    --muted: 240 5% 30%;
+    --muted-foreground: 240 5% 75%;
 
-    --destructive: 0 62.8% 30.6%; /* Darker Red */
-    --destructive-foreground: 210 40% 98%;
+    --accent: 45 70% 63%;
+    --accent-foreground: 240 10% 4%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 0 0% 100%; /* White for dark mode focus rings */
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 5% 25%;
+    --input: 240 5% 20%;
+    --ring: 45 67% 51%;
   }
 }
 
@@ -72,41 +73,33 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-foreground;
   }
 }
 
-/* Custom scrollbar for a cleaner look */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: hsl(var(--secondary));
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.7);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
+.btn-primary {
+  @apply bg-brand-gold text-brand-black hover:bg-brand-lightgold focus:ring-brand-gold font-semibold tracking-wide;
 }
 
-/* Ensure inputs and selects in dark mode have appropriate text color */
-.dark input, .dark select, .dark textarea {
-    @apply placeholder:text-slate-400 text-white;
+.btn-secondary {
+  @apply bg-brand-charcoal text-brand-white hover:bg-opacity-80 focus:ring-brand-gray font-medium;
 }
 
-/* Apply Lato Light font to body and footer */
-body {
-  font-family: 'Lato', sans-serif;
+.btn-outline-gold {
+  @apply border border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-brand-black focus:ring-brand-gold font-medium;
 }
-footer {
-  font-family: 'Lato', sans-serif;
-  font-weight: 300;
-  text-align: center;
-  padding: 1rem 0;
-  color: #333;
+
+.product-card {
+  @apply bg-card border border-brand-charcoal rounded-lg shadow-xl hover:shadow-brand-gold/20 transition-all duration-300 overflow-hidden flex flex-col;
+}
+
+.admin-input {
+  @apply block w-full px-4 py-3 border border-brand-gray/50 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-gold focus:border-brand-gold sm:text-sm bg-brand-charcoal text-brand-white placeholder-brand-gray;
+}
+
+.admin-label {
+  @apply block text-sm font-medium text-brand-gray mb-1;
 }

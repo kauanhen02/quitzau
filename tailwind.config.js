@@ -50,6 +50,14 @@ module.exports = {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))',
 				},
+        brand: {
+          black: '#121212', // Deep Black
+          charcoal: '#2C2C2C', // Charcoal Gray
+          gold: '#D4AF37', // Gold accent
+          lightgold: '#E0C670', // Lighter Gold for hover/details
+          white: '#FFFFFF',
+          gray: '#A9A9A9', // Medium Gray for text/borders
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -65,10 +73,19 @@ module.exports = {
 					from: { height: 'var(--radix-accordion-content-height)' },
 					to: { height: 0 },
 				},
+        'fadeIn': {
+          '0%': { opacity: 0, transform: 'translateY(10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
+        'fadeIn': 'fadeIn 0.5s ease-out forwards',
+			},
+			fontFamily: {
+				sans: ['Lato', 'sans-serif'],
+        display: ['Montserrat', 'sans-serif'],
 			},
 		},
 	},
