@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const categories = [
-  "Todas", "Carnes", "Aves", "Peixes", "Suínos", 
-  "Cordeiro", "Especiais", "Congelados", "Kits e Combos", "Ofertas"
+  "Todas", "Ofertas", "Bovino Primeira", "Cortes Nobres", "Aves", 
+  "Suíno", "Peixes", "Espetos Dia/Dia", "Espeto Gourmet", "Carneiros"
 ];
 
 const CategoryFilter = ({ selectedCategory, onSelectCategory }) => {

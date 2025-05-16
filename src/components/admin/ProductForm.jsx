@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 
 const categories = [
-  "Carnes", "Aves", "Peixes", "Suínos", 
-  "Cordeiro", "Especiais", "Congelados", "Kits e Combos", "Ofertas"
+  "Ofertas", "Bovino Primeira", "Cortes Nobres", "Aves", 
+  "Suíno", "Peixes", "Espetos Dia/Dia", "Espeto Gourmet", "Carneiros"
 ];
 
 const units = ["Kg", "Unidade", "Pacote", "Bandeja", "Peça"];
@@ -88,7 +88,7 @@ const ProductForm = ({ onSubmit, initialData, onCancel, isLoading }) => {
               <SelectValue placeholder="Selecione uma categoria" />
             </SelectTrigger>
             <SelectContent className="bg-brand-charcoal border-brand-gray/50 text-brand-white">
-              {categories.filter(c => c !== "Todas").map(cat => (
+              {categories.map(cat => (
                 <SelectItem key={cat} value={cat} className="hover:bg-brand-gold/20 focus:bg-brand-gold/30">{cat}</SelectItem>
               ))}
             </SelectContent>
