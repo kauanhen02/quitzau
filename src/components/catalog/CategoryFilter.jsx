@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const categories = [
+  "Linguiça e Embutido",
   "Todas", "Ofertas", "Bovino Primeira", "Cortes Nobres", "Aves", 
   "Suíno", "Peixes", "Espetos Dia/Dia", "Espeto Gourmet", "Carneiros"
 ];

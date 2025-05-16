@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 
 const categories = [
+  "Linguiça e Embutido",
   "Ofertas", "Bovino Primeira", "Cortes Nobres", "Aves", 
   "Suíno", "Peixes", "Espetos Dia/Dia", "Espeto Gourmet", "Carneiros"
 ];
