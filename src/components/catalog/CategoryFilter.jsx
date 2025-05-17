@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 const categories = [
   "Todas", "Ofertas", "Bovino Primeira", "Bovino Segunda", "Linguiça e Embutido", 
-  "Peixes", "Espetos Dia/Dia", "Espeto Gourmet", "Cortes Nobres", "Carneiros", "Miúdos Bovino"
+  "Peixes", "Espetos Dia/Dia", "Espeto Gourmet", "Cortes Nobres", "Carneiros", "Miúdos Bovino", "Aves", "Suíno"
 ];
 
 const CategoryFilter = ({ selectedCategory, onSelectCategory }) => {
