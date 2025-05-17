@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { db } from '@/firebase.js';
 import { collection, getDocs } from 'firebase/firestore';
 import ProductCard from '@/components/catalog/ProductCard.jsx';
@@ -9,11 +10,20 @@ import { Input } from '@/components/ui/input.jsx';
 import { Search, Loader2 } from 'lucide-react';
 
 const HomePage = () => {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const getCategoryFromUrl = useCallback(() => {
+    const queryParams = new URLSearchParams(location.search);
+    return queryParams.get('category') || "Todas";
+  }, [location.search]);
+
+  const [selectedCategory, setSelectedCategory] = useState(getCategoryFromUrl());
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -22,41 +32,65 @@ const HomePage = () => {
         const productsCollection = collection(db, "products");
         const productsSnapshot = await getDocs(productsCollection);
         const productsList = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProducts(productsList);
-        setFilteredProducts(productsList); 
+        setAllProducts(productsList);
+        // Initialize filteredProducts with all products or based on URL category
+        const initialCategory = getCategoryFromUrl();
+        let initialFiltered = productsList;
+        if (initialCategory !== "Todas") {
+          initialFiltered = productsList.filter(product => product.category === initialCategory);
+        }
+        setFilteredProducts(initialFiltered);
+
       } catch (error) {
         console.error("Erro ao buscar produtos: ", error);
+        setFilteredProducts([]); // Ensure it's an empty array on error
       }
       setLoading(false);
     };
     fetchProducts();
-  }, []);
+  }, [getCategoryFromUrl]); // Added getCategoryFromUrl to ensure initial load respects URL
 
   useEffect(() => {
-    let currentProducts = [...products];
+    // Update selectedCategory if URL changes (e.g. browser back/forward)
+    const categoryFromUrl = getCategoryFromUrl();
+    if (categoryFromUrl !== selectedCategory) {
+        setSelectedCategory(categoryFromUrl);
+    }
+  }, [location.search, selectedCategory, getCategoryFromUrl]);
+
+  useEffect(() => {
+    let currentProducts = [...allProducts];
 
     if (selectedCategory !== "Todas") {
       currentProducts = currentProducts.filter(product => product.category === selectedCategory);
     }
 
     if (searchTerm) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
       currentProducts = currentProducts.filter(product =>
-        (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+        (product.name && product.name.toLowerCase().includes(lowerSearchTerm)) ||
+        (product.description && product.description.toLowerCase().includes(lowerSearchTerm))
       );
     }
     setFilteredProducts(currentProducts);
-  }, [selectedCategory, searchTerm, products]);
+  }, [selectedCategory, searchTerm, allProducts]);
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-  };
+  const handleCategorySelect = useCallback((category) => {
+    setSelectedCategory(category); 
+    const newSearchParams = new URLSearchParams(location.search);
+    if (category === "Todas") {
+      newSearchParams.delete('category');
+    } else {
+      newSearchParams.set('category', category);
+    }
+    navigate(`${location.pathname}?${newSearchParams.toString()}`, { replace: true });
+  }, [navigate, location.search, location.pathname]);
   
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  if (loading) {
+  if (loading && allProducts.length === 0) {
     return (
       <div className="container mx-auto px-4 py-12 text-center flex flex-col items-center justify-center min-h-[calc(100vh-12rem)]">
         <Loader2 className="h-12 w-12 animate-spin text-brand-gold mb-4" />
@@ -105,8 +139,8 @@ const HomePage = () => {
           <img  alt="Prato vazio elegante" className="mx-auto mb-6 w-40 h-40 opacity-60" src="https://images.unsplash.com/photo-1576867757602-739d3a7efc48?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGVtcHR5JTIwcGxhdGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60" />
           <p className="text-2xl font-semibold text-brand-white mb-2">Nenhum corte encontrado.</p>
           <p className="text-brand-gray">
-            Tente ajustar sua busca ou explore outras categorias.
-            {selectedCategory !== "Todas" && ` Em "${selectedCategory}"`}
+            Tente ajustar sua busca ou explore outras categorias
+            {selectedCategory !== "Todas" && ` em "${selectedCategory}"`}
             {searchTerm && ` com o termo "${searchTerm}"`}.
           </p>
         </motion.div>

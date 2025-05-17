@@ -5,19 +5,22 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase
 import ProductCard from '@/components/catalog/ProductCard.jsx';
 import ProductForm from '@/components/admin/ProductForm.jsx';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast.js';
-import { PlusCircle, Edit, Trash2, AlertTriangle, Loader2, PackageSearch } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, AlertTriangle, Loader2, PackageSearch, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 
 const AdminDashboardPage = () => {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   const fetchProducts = useCallback(async () => {
@@ -26,7 +29,8 @@ const AdminDashboardPage = () => {
       const productsCollection = collection(db, "products");
       const productsSnapshot = await getDocs(productsCollection);
       const productsList = productsSnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-      setProducts(productsList);
+      setAllProducts(productsList);
+      setFilteredProducts(productsList);
     } catch (error) {
       toast({ title: "Erro ao buscar produtos", description: error.message, variant: "destructive", className: 'bg-red-700 text-white border-red-500' });
     }
@@ -36,6 +40,19 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  useEffect(() => {
+    let currentProducts = [...allProducts];
+    if (searchTerm) {
+      currentProducts = currentProducts.filter(product =>
+        (product.name && product.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    setFilteredProducts(currentProducts);
+  }, [searchTerm, allProducts]);
+
 
   const handleFormSubmit = async (productData) => {
     setIsSubmitting(true);
@@ -73,6 +90,10 @@ const AdminDashboardPage = () => {
     }
      setIsSubmitting(false);
   };
+  
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -80,12 +101,30 @@ const AdminDashboardPage = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4"
       >
         <h1 className="text-3xl sm:text-4xl font-bold text-brand-white tracking-tight">Gerenciamento de Produtos</h1>
         <Button onClick={() => { setEditingProduct(null); setIsFormOpen(true); }} className="btn-primary px-6 py-3 text-base">
           <PlusCircle className="mr-2 h-5 w-5" /> Adicionar Produto
         </Button>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }} 
+        className="mb-10"
+      >
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-brand-gray h-5 w-5" />
+          <Input 
+            type="text"
+            placeholder="Buscar produtos por nome, descrição ou categoria..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="admin-input pl-12 pr-4 py-3 w-full text-base focus:bg-brand-charcoal/70"
+          />
+        </div>
       </motion.div>
 
       <Dialog open={isFormOpen} onOpenChange={(isOpen) => { if (!isSubmitting) setIsFormOpen(isOpen); }}>
@@ -105,28 +144,34 @@ const AdminDashboardPage = () => {
         </DialogContent>
       </Dialog>
 
-      {isLoading && products.length === 0 ? (
+      {isLoading && filteredProducts.length === 0 ? (
          <div className="text-center py-16 flex flex-col items-center">
           <Loader2 className="h-12 w-12 animate-spin text-brand-gold mb-4" />
           <p className="text-xl text-brand-white">Carregando produtos do catálogo...</p>
         </div>
-      ) : products.length === 0 ? (
+      ) : filteredProducts.length === 0 ? (
          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-20 bg-brand-charcoal/50 rounded-xl shadow-lg"
           >
           <PackageSearch className="mx-auto mb-6 w-24 h-24 text-brand-gold opacity-50" />
-          <h2 className="text-3xl font-semibold text-brand-white mb-3">Seu catálogo está vazio.</h2>
-          <p className="text-brand-gray mb-8 max-w-md mx-auto">Comece adicionando seus produtos para exibi-los aos seus clientes.</p>
-          <Button onClick={() => { setEditingProduct(null); setIsFormOpen(true); }} className="btn-primary px-8 py-3 text-lg">
-            <PlusCircle className="mr-2 h-5 w-5" /> Adicionar Primeiro Produto
-          </Button>
+          <h2 className="text-3xl font-semibold text-brand-white mb-3">
+            {searchTerm ? `Nenhum produto encontrado para "${searchTerm}"` : "Seu catálogo está vazio."}
+          </h2>
+          <p className="text-brand-gray mb-8 max-w-md mx-auto">
+            {searchTerm ? "Tente refinar sua busca ou adicione novos produtos." : "Comece adicionando seus produtos para exibi-los aos seus clientes."}
+          </p>
+          {!searchTerm && (
+            <Button onClick={() => { setEditingProduct(null); setIsFormOpen(true); }} className="btn-primary px-8 py-3 text-lg">
+                <PlusCircle className="mr-2 h-5 w-5" /> Adicionar Primeiro Produto
+            </Button>
+          )}
         </motion.div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
           <AnimatePresence>
-            {products.map(product => (
+            {filteredProducts.map(product => (
               <motion.div
                 key={product.id}
                 layout
@@ -140,7 +185,7 @@ const AdminDashboardPage = () => {
                   isAdmin 
                   onEdit={handleEditProduct} 
                   onDelete={(productId) => {
-                     const prodToDelete = products.find(p => p.id === productId);
+                     const prodToDelete = filteredProducts.find(p => p.id === productId);
                      if (prodToDelete) {
                         document.getElementById(`delete-trigger-${productId}`).click();
                      }
